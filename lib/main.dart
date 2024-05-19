@@ -6,6 +6,7 @@ void main() {
   runApp(
     ProviderScope(
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Bakery Admin',
         theme: ThemeData(
           primarySwatch: Colors.blue,
