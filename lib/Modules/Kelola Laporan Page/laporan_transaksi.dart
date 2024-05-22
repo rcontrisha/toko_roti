@@ -1,5 +1,6 @@
-import 'dart:convert';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:toko_roti/Services/api_services.dart';
 
 class LaporanTransaksi extends StatefulWidget {
@@ -101,10 +102,26 @@ class _LaporanTransaksiState extends State<LaporanTransaksi> {
           ),
           Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: _selectedTransactionType == TransactionType.daily
-                  ? _buildDailyTransactionTable()
-                  : _buildMonthlyTransactionTable(),
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: _selectedTransactionType == TransactionType.daily
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDailyTransactionTable(),
+                          _buildDailySalesChart(),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMonthlyTransactionTable(),
+                          _buildMonthlySalesChart(),
+                          _buildMonthlyAverageSalesChart(),
+                        ],
+                      ),
+              ),
             ),
           ),
         ],
@@ -194,6 +211,247 @@ class _LaporanTransaksiState extends State<LaporanTransaksi> {
             ),
           )
           .toList(),
+    );
+  }
+
+  Widget _buildDailySalesChart() {
+    if (!_hasDailyTransactionsInSelectedMonth()) {
+      return Center(
+        child: Text('Tidak Ada Data Transaksi di Bulan Ini'),
+      );
+    }
+
+    List filteredTransactions = _dailyTransactions
+        .where((transaction) =>
+            _getMonthFromDate(transaction['transaction_date']) ==
+            _selectedMonth)
+        .toList();
+
+    List<double> salesData = filteredTransactions.map<double>((transaction) {
+      try {
+        return double.parse(transaction['total_amount'].toString());
+      } catch (e) {
+        return 0.0; // Atau nilai default lainnya jika tidak valid
+      }
+    }).toList();
+
+    List<FlSpot> spots = List.generate(
+      salesData.length,
+      (index) => FlSpot(index.toDouble(), salesData[index]),
+    );
+
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      height: 300,
+      width: 400,
+      child: LineChart(
+        LineChartData(
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                  showTitles: false), // Menghapus angka-angka di sumbu y
+            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  int day = value.toInt() + 1;
+                  if (day > filteredTransactions.length) {
+                    return Container();
+                  } else {
+                    String date =
+                        filteredTransactions[day - 1]['transaction_date'];
+                    return Text(
+                      DateFormat('dd').format(DateTime.parse(date)),
+                      style: TextStyle(fontSize: 10),
+                    );
+                  }
+                },
+
+                interval:
+                    1, // Mengatur interval untuk memastikan tanggal tidak berulang
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: true),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: false,
+              color: Colors.blue,
+              barWidth: 4,
+              isStrokeCapRound: true,
+              belowBarData: BarAreaData(show: false),
+            ),
+          ],
+          minX: 0,
+          maxX: (spots.length - 1).toDouble(),
+          minY: 0,
+          maxY: salesData.reduce(
+                  (value, element) => value > element ? value : element) *
+              1.1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthlySalesChart() {
+    List<double> monthlySalesData =
+        _monthlyTransactions.map<double>((transaction) {
+      try {
+        return double.parse(transaction['total_amount'].toString());
+      } catch (e) {
+        return 0.0; // Nilai default jika tidak valid
+      }
+    }).toList();
+
+    List<String> months = _monthlyTransactions.map<String>((transaction) {
+      try {
+        return transaction['transaction_month'].toString();
+      } catch (e) {
+        return '';
+      }
+    }).toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Text(
+            'Grafik Total Penjualan per Bulan',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+          height: 300,
+          width: 400,
+          child: BarChart(
+            BarChartData(
+              titlesData: FlTitlesData(
+                leftTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      int index = value.toInt();
+                      if (index >= 0 && index < months.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 5.0),
+                          child: Text(
+                            months[index],
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        );
+                      }
+                      return Text('');
+                    },
+                    interval: 1,
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(show: true),
+              barGroups: List.generate(
+                monthlySalesData.length,
+                (index) => BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: monthlySalesData[index],
+                      color: Colors.blue,
+                      width: 16,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyAverageSalesChart() {
+    List<double> monthlyAverageSalesData =
+        _monthlyTransactions.map<double>((transaction) {
+      try {
+        return double.parse(transaction['average_amount'].toString());
+      } catch (e) {
+        return 0.0; // Nilai default jika tidak valid
+      }
+    }).toList();
+
+    // Daftar bulan yang sesuai dengan data yang Anda gunakan dalam tabel
+    List<String> months = _monthlyTransactions.map<String>((transaction) {
+      try {
+        return transaction['transaction_month'].toString();
+      } catch (e) {
+        return '';
+      }
+    }).toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Text(
+            'Grafik Rata-rata Penjualan Bulanan',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+          height: 300,
+          width: 400,
+          child: BarChart(
+            BarChartData(
+              titlesData: FlTitlesData(
+                leftTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      int index = value.toInt();
+                      if (index >= 0 && index < months.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 5.0),
+                          child: Text(
+                            months[index],
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        );
+                      }
+                      return Text('');
+                    },
+                    interval: 1,
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(show: true),
+              barGroups: List.generate(
+                monthlyAverageSalesData.length,
+                (index) => BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: monthlyAverageSalesData[index],
+                      color: Colors.blue,
+                      width: 16,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

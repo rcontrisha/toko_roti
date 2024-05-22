@@ -7,8 +7,6 @@ import 'package:toko_roti/Modules/Kelola%20Barang%20Page/Daftar%20Barang/daftar_
 import 'package:toko_roti/Modules/Kelola%20Barang%20Page/Daftar%20Kategori/daftar_kategori.dart';
 import 'package:toko_roti/Modules/Kelola%20Barang%20Page/kelola_barang.dart';
 import 'package:toko_roti/Modules/Kelola%20Barang%20Page/pasok_barang.dart';
-import 'package:toko_roti/Modules/Kelola%20Laporan%20Page/kelola_laporan.dart';
-import 'package:toko_roti/Modules/Kelola%20Laporan%20Page/laporan_pegawai.dart';
 import 'package:toko_roti/Modules/Kelola%20Laporan%20Page/laporan_transaksi.dart';
 import 'package:toko_roti/Modules/Transaksi%20Page/transaksi.dart';
 
@@ -18,7 +16,7 @@ enum SideBarItem {
   kelolaakun,
   kelolabarang,
   transaksi,
-  kelolalaporan,
+  laporantransaksi,
 }
 
 class HomePage extends StatefulWidget {
@@ -39,6 +37,7 @@ class _HomePageState extends State<HomePage> {
     _selectedItem = SideBarItem.dashboard;
     _selectedScreen = DashboardScreen();
     _title = 'Dashboard'; // Initialize the title here
+    print('Init State - Title: $_title'); // Logging
   }
 
   SideBarItem _getSideBarItem(String route) {
@@ -51,13 +50,11 @@ class _HomePageState extends State<HomePage> {
         return SideBarItem.kelolabarang;
       case 'transaksi':
         return SideBarItem.transaksi;
-      case 'kelolalaporan':
-        return SideBarItem.kelolalaporan;
+      case 'laporantransaksi':
+        return SideBarItem.laporantransaksi;
       case 'daftarkategori':
       case 'daftarbarang':
       case 'pasokbarang':
-      case 'laporantransaksi':
-      case 'laporanpegawai':
         return _selectedItem; // Keep the parent selected item for sub-routes
       default:
         return SideBarItem.dashboard;
@@ -68,141 +65,148 @@ class _HomePageState extends State<HomePage> {
     switch (route) {
       case 'dashboard':
         _title = 'Dashboard';
-        return DashboardScreen();
+        break;
       case 'kelolaakun':
         _title = 'Kelola Akun';
-        return KelolaAkun();
+        break;
       case 'kelolabarang':
         _title = 'Kelola Barang';
-        return KelolaBarang();
+        break;
       case 'transaksi':
         _title = 'Transaksi';
-        return Transaksi();
-      case 'kelolalaporan':
-        _title = 'Kelola Laporan';
-        return KelolaLaporan();
-      case 'daftarkategori':
-        _title = 'Daftar Kategori';
-        return DaftarKategori();
-      case 'daftarbarang':
-        _title = 'Daftar Barang';
-        return DaftarBarang();
-      case 'pasokbarang':
-        _title = 'Pasok Barang';
-        return PasokBarang();
+        break;
       case 'laporantransaksi':
         _title = 'Laporan Transaksi';
-        return LaporanTransaksi();
-      case 'laporanpegawai':
-        _title = 'Laporan Pegawai';
-        return LaporanPegawai();
+        break;
+      case 'daftarkategori':
+        _title = 'Daftar Kategori';
+        break;
+      case 'daftarbarang':
+        _title = 'Daftar Barang';
+        break;
+      case 'pasokbarang':
+        _title = 'Pasok Barang';
+        break;
       default:
         _title = 'Dashboard';
+    }
+    print('Selected Screen - Title: $_title'); // Logging
+
+    switch (route) {
+      case 'dashboard':
+        return DashboardScreen();
+      case 'kelolaakun':
+        return KelolaAkun();
+      case 'kelolabarang':
+        return KelolaBarang();
+      case 'transaksi':
+        return Transaksi();
+      case 'laporantransaksi':
+        return LaporanTransaksi();
+      case 'daftarkategori':
+        return DaftarKategori();
+      case 'daftarbarang':
+        return DaftarBarang();
+      case 'pasokbarang':
+        return PasokBarang();
+      default:
         return Container();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sideBarkey = ValueKey(Random().nextInt(1000000));
-
-    return AdminScaffold(
+    return Scaffold(
       appBar: AppBar(
-        key: UniqueKey(), // Menambahkan UniqueKey di sini
         title: Text(_title),
       ),
-      sideBar: SideBar(
-        key: sideBarkey,
-        activeBackgroundColor: Colors.white,
-        onSelected: (item) {
-          final sideBarItem = _getSideBarItem(item.route!);
-          setState(() {
-            _selectedItem = sideBarItem;
-            _selectedScreen = _getSelectedScreen(item.route!);
-            _title = _getTitleForItem(item.route!); // Memperbarui judul di sini
-          });
-        },
-        items: [
-          AdminMenuItem(
-            title: 'Dashboard',
-            icon: Icons.dashboard,
-            route: 'dashboard',
-          ),
-          AdminMenuItem(
-            title: 'Kelola Akun',
-            icon: Icons.business,
-            route: 'kelolaakun',
-          ),
-          AdminMenuItem(
-            title: 'Kelola Barang',
-            icon: Icons.group,
-            route: 'kelolabarang',
-            children: [
-              AdminMenuItem(
-                title: 'Daftar Kategori',
-                route: 'daftarkategori',
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
               ),
-              AdminMenuItem(
-                title: 'Daftar Barang',
-                route: 'daftarbarang',
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
               ),
-              AdminMenuItem(
-                title: 'Pasok Barang',
-                route: 'pasokbarang',
-              ),
-            ],
-          ),
-          AdminMenuItem(
-            title: 'Transaksi',
-            icon: Icons.campaign,
-            route: 'transaksi',
-          ),
-          AdminMenuItem(
-            title: 'Kelola Laporan',
-            icon: Icons.settings,
-            route: 'kelolalaporan',
-            children: [
-              AdminMenuItem(
-                title: 'Laporan Transaksi',
-                route: 'laporantransaksi',
-              ),
-              AdminMenuItem(
-                title: 'Laporan Pegawai',
-                route: 'laporanpegawai',
-              ),
-            ],
-          ),
-        ],
-        selectedRoute: _selectedItem.toString().split('.').last,
+            ),
+            _buildDrawerItem(
+              icon: Icons.dashboard,
+              text: 'Dashboard',
+              route: 'dashboard',
+            ),
+            _buildDrawerItem(
+              icon: Icons.business,
+              text: 'Kelola Akun',
+              route: 'kelolaakun',
+            ),
+            ExpansionTile(
+              leading: Icon(Icons.group),
+              title: Text('Kelola Barang'),
+              children: [
+                _buildDrawerItem(
+                  text: 'Daftar Kategori',
+                  route: 'daftarkategori',
+                ),
+                _buildDrawerItem(
+                  text: 'Daftar Barang',
+                  route: 'daftarbarang',
+                ),
+                _buildDrawerItem(
+                  text: 'Pasok Barang',
+                  route: 'pasokbarang',
+                ),
+              ],
+            ),
+            _buildDrawerItem(
+              icon: Icons.campaign,
+              text: 'Transaksi',
+              route: 'transaksi',
+            ),
+            _buildDrawerItem(
+              icon: Icons.settings,
+              text: 'Laporan Transaksi',
+              route: 'laporantransaksi',
+            ),
+          ],
+        ),
       ),
       body: _selectedScreen,
     );
   }
 
-  String _getTitleForItem(String route) {
-    switch (route) {
-      case 'dashboard':
-        return 'Dashboard';
-      case 'kelolaakun':
-        return 'Kelola Akun';
-      case 'kelolabarang':
-        return 'Kelola Barang';
-      case 'transaksi':
-        return 'Transaksi';
-      case 'kelolalaporan':
-        return 'Kelola Laporan';
-      case 'daftarkategori':
-        return 'Daftar Kategori';
-      case 'daftarbarang':
-        return 'Daftar Barang';
-      case 'pasokbarang':
-        return 'Pasok Barang';
-      case 'laporantransaksi':
-        return 'Laporan Transaksi';
-      case 'laporanpegawai':
-        return 'Laporan Pegawai';
-      default:
-        return 'Dashboard';
-    }
+  Widget _buildDrawerItem({
+    IconData? icon,
+    required String text,
+    required String route,
+  }) {
+    final bool selected = _selectedItem == _getSideBarItem(route);
+    return ListTile(
+      leading: icon != null ? Icon(icon) : null,
+      title: Text(
+        text,
+        style: TextStyle(
+          color: selected ? Colors.blue : Colors.black,
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: selected,
+      onTap: () {
+        _onSelected(route);
+      },
+    );
+  }
+
+  void _onSelected(String route) {
+    final sideBarItem = _getSideBarItem(route);
+    setState(() {
+      _selectedItem = sideBarItem;
+      _selectedScreen = _getSelectedScreen(route);
+    });
   }
 }

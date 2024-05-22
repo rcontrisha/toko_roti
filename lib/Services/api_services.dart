@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = "http://192.168.1.2:8000/api";
+  final String baseUrl = "http://192.168.1.8:8000/api";
 
   // Fetch list of barang
   Future<List<dynamic>> fetchBarang() async {
