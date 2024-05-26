@@ -1,20 +1,16 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_admin_scaffold/admin_scaffold.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toko_roti/Modules/Dashboard%20Page/dashboard.dart';
-import 'package:toko_roti/Modules/Kelola%20Akun%20Page/kelola_akun_view.dart';
-import 'package:toko_roti/Modules/Kelola%20Barang%20Page/Daftar%20Barang/daftar_barang.dart';
-import 'package:toko_roti/Modules/Kelola%20Barang%20Page/Daftar%20Kategori/daftar_kategori.dart';
-import 'package:toko_roti/Modules/Kelola%20Barang%20Page/kelola_barang.dart';
-import 'package:toko_roti/Modules/Kelola%20Barang%20Page/pasok_barang.dart';
-import 'package:toko_roti/Modules/Kelola%20Laporan%20Page/laporan_transaksi.dart';
+import 'package:toko_roti/Modules/Kelola%20Akun%20Page/daftar_akun.dart';
+import 'package:toko_roti/Modules/Kelola%20Akun%20Page/hak_akses.dart';
+import 'package:toko_roti/Modules/Laporan%20Transaksi%20Page/laporan_transaksi.dart';
+import 'package:toko_roti/Modules/Login%20Page/login_screen.dart';
 import 'package:toko_roti/Modules/Transaksi%20Page/transaksi.dart';
 
-// Enum for Sidebar Items
 enum SideBarItem {
   dashboard,
-  kelolaakun,
-  kelolabarang,
+  daftarakun,
+  hakakses,
   transaksi,
   laporantransaksi,
 }
@@ -30,32 +26,36 @@ class _HomePageState extends State<HomePage> {
   late SideBarItem _selectedItem;
   late Widget _selectedScreen;
   late String _title;
+  late String _username;
 
   @override
   void initState() {
     super.initState();
     _selectedItem = SideBarItem.dashboard;
-    _selectedScreen = DashboardScreen();
-    _title = 'Dashboard'; // Initialize the title here
-    print('Init State - Title: $_title'); // Logging
+    _selectedScreen = DashboardPage();
+    _title = 'Dashboard';
+    _loadUsername();
+  }
+
+  void _loadUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _username = prefs.getString('nama_user') ?? '';
+    });
   }
 
   SideBarItem _getSideBarItem(String route) {
     switch (route) {
       case 'dashboard':
         return SideBarItem.dashboard;
-      case 'kelolaakun':
-        return SideBarItem.kelolaakun;
-      case 'kelolabarang':
-        return SideBarItem.kelolabarang;
+      case 'daftarakun':
+        return SideBarItem.daftarakun;
+      case 'hakakses':
+        return SideBarItem.hakakses;
       case 'transaksi':
         return SideBarItem.transaksi;
       case 'laporantransaksi':
         return SideBarItem.laporantransaksi;
-      case 'daftarkategori':
-      case 'daftarbarang':
-      case 'pasokbarang':
-        return _selectedItem; // Keep the parent selected item for sub-routes
       default:
         return SideBarItem.dashboard;
     }
@@ -66,11 +66,11 @@ class _HomePageState extends State<HomePage> {
       case 'dashboard':
         _title = 'Dashboard';
         break;
-      case 'kelolaakun':
-        _title = 'Kelola Akun';
+      case 'daftarakun':
+        _title = 'Daftar Akun';
         break;
-      case 'kelolabarang':
-        _title = 'Kelola Barang';
+      case 'hakakses':
+        _title = 'Hak Akses';
         break;
       case 'transaksi':
         _title = 'Transaksi';
@@ -78,40 +78,33 @@ class _HomePageState extends State<HomePage> {
       case 'laporantransaksi':
         _title = 'Laporan Transaksi';
         break;
-      case 'daftarkategori':
-        _title = 'Daftar Kategori';
-        break;
-      case 'daftarbarang':
-        _title = 'Daftar Barang';
-        break;
-      case 'pasokbarang':
-        _title = 'Pasok Barang';
-        break;
       default:
         _title = 'Dashboard';
     }
-    print('Selected Screen - Title: $_title'); // Logging
 
     switch (route) {
       case 'dashboard':
-        return DashboardScreen();
+        return DashboardPage();
       case 'kelolaakun':
-        return KelolaAkun();
-      case 'kelolabarang':
-        return KelolaBarang();
+      case 'daftarakun':
+        return DaftarAkun();
+      case 'hakakses':
+        return HakAksesPage();
       case 'transaksi':
         return Transaksi();
       case 'laporantransaksi':
         return LaporanTransaksi();
-      case 'daftarkategori':
-        return DaftarKategori();
-      case 'daftarbarang':
-        return DaftarBarang();
-      case 'pasokbarang':
-        return PasokBarang();
       default:
         return Container();
     }
+  }
+
+  void _logOut() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('nama_user');
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   @override
@@ -119,13 +112,46 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
+        backgroundColor: Colors.greenAccent[400],
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.person),
+            onSelected: (String value) {
+              if (value == 'logout') {
+                _logOut();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem<String>(
+                  value: 'user',
+                  child: Text(_username),
+                ),
+                PopupMenuDivider(height: 1),
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the popup menu
+                      _logOut();
+                    },
+                    child: Text(
+                      'Log Out',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.greenAccent[400],
               ),
               child: Text(
                 'Menu',
@@ -140,26 +166,34 @@ class _HomePageState extends State<HomePage> {
               text: 'Dashboard',
               route: 'dashboard',
             ),
-            _buildDrawerItem(
-              icon: Icons.business,
-              text: 'Kelola Akun',
-              route: 'kelolaakun',
-            ),
             ExpansionTile(
-              leading: Icon(Icons.group),
-              title: Text('Kelola Barang'),
+              iconColor: Colors.greenAccent[400],
+              leading: Icon(Icons.business,
+                  color: _selectedItem == SideBarItem.daftarakun ||
+                          _selectedItem == SideBarItem.hakakses
+                      ? Colors.greenAccent[400]
+                      : Colors.black),
+              title: Text(
+                'Kelola Akun',
+                style: TextStyle(
+                  color: _selectedItem == SideBarItem.daftarakun ||
+                          _selectedItem == SideBarItem.hakakses
+                      ? Colors.greenAccent[400]
+                      : Colors.black,
+                  fontWeight: _selectedItem == SideBarItem.daftarakun ||
+                          _selectedItem == SideBarItem.hakakses
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                ),
+              ),
               children: [
                 _buildDrawerItem(
-                  text: 'Daftar Kategori',
-                  route: 'daftarkategori',
+                  text: 'Daftar Akun',
+                  route: 'daftarakun',
                 ),
                 _buildDrawerItem(
-                  text: 'Daftar Barang',
-                  route: 'daftarbarang',
-                ),
-                _buildDrawerItem(
-                  text: 'Pasok Barang',
-                  route: 'pasokbarang',
+                  text: 'Hak Akses',
+                  route: 'hakakses',
                 ),
               ],
             ),
@@ -186,12 +220,13 @@ class _HomePageState extends State<HomePage> {
     required String route,
   }) {
     final bool selected = _selectedItem == _getSideBarItem(route);
+    final Color iconColor = selected ? Colors.greenAccent : Colors.black;
     return ListTile(
-      leading: icon != null ? Icon(icon) : null,
+      leading: icon != null ? Icon(icon, color: iconColor) : null,
       title: Text(
         text,
         style: TextStyle(
-          color: selected ? Colors.blue : Colors.black,
+          color: selected ? Colors.greenAccent[400] : Colors.black,
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

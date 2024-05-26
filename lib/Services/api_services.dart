@@ -2,7 +2,95 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = "http://192.168.1.8:8000/api";
+  final String baseUrl = "http://192.168.1.25:8000/api";
+
+  Future<dynamic> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'username': username,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to login');
+    }
+  }
+
+  // Fetch list of akun
+  Future<List<dynamic>> fetchAkun() async {
+    final response = await http.get(Uri.parse('$baseUrl/akun'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load akun');
+    }
+  }
+
+  // Fetch a single akun by id
+  Future<dynamic> fetchAkunById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/akun/$id'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load akun');
+    }
+  }
+
+  // Create a new akun
+  Future<dynamic> createAkun(Map<String, dynamic> akun) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/akun'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(akun),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create akun');
+    }
+  }
+
+  // Update an existing akun
+  Future<dynamic> updateAkun(int id, Map<String, dynamic> akun) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/akun/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(akun),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update akun');
+    }
+  }
+
+  // Delete an akun
+  Future<void> deleteAkun(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/akun/$id'));
+
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      throw Exception('Failed to delete akun');
+    }
+  }
+
+  // Existing functions for other services...
 
   // Fetch list of barang
   Future<List<dynamic>> fetchBarang() async {
@@ -168,7 +256,7 @@ class ApiService {
     }
   }
 
-// Fetch list of monthly transactions
+  // Fetch list of monthly transactions
   Future<List<dynamic>> fetchMonthlyTransactions() async {
     final response = await http.get(Uri.parse('$baseUrl/monthly-transactions'));
 
@@ -212,6 +300,141 @@ class ApiService {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to create monthly transaction');
+    }
+  }
+
+  // Fetch list of access rights
+  Future<List<dynamic>> fetchAccessRights() async {
+    final response = await http.get(Uri.parse('$baseUrl/access-rights'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load access rights');
+    }
+  }
+
+  // Fetch a single access right by id
+  Future<dynamic> fetchAccessRightById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/access-rights/$id'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load access right');
+    }
+  }
+
+  // Create a new access right
+  Future<dynamic> createAccessRight(Map<String, dynamic> accessRight) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/access-rights'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(accessRight),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create access right');
+    }
+  }
+
+  // Update an existing access right
+  Future<dynamic> updateAccessRight(
+      String username, Map<String, dynamic> accessRight) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/access-rights/$username'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(accessRight),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update access right');
+    }
+  }
+
+  // Delete an access right
+  Future<void> deleteAccessRight(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/access-rights/$id'));
+
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      throw Exception('Failed to delete access right');
+    }
+  }
+
+  // Fetch list of transactions
+  Future<List<dynamic>> fetchTransactions() async {
+    final response = await http.get(Uri.parse('$baseUrl/transactions'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load transactions');
+    }
+  }
+
+  // Fetch a single transaction by id
+  Future<dynamic> fetchTransactionById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/transactions/$id'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load transaction');
+    }
+  }
+
+  // Create a new transaction
+  Future<dynamic> createTransaction(Map<String, dynamic> transaction) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/transactions'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(transaction),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to create transaction');
+    }
+  }
+
+  // Update an existing transaction
+  Future<dynamic> updateTransaction(int id, Map<String, dynamic> transaction) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/transactions/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(transaction),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update transaction');
+    }
+  }
+
+  // Delete a transaction
+  Future<void> deleteTransaction(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/transactions/$id'));
+
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      throw Exception('Failed to delete transaction');
     }
   }
 }

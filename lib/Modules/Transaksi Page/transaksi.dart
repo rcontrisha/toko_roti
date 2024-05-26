@@ -254,29 +254,93 @@ class _TransaksiState extends State<Transaksi> {
                   SizedBox(height: 10),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Pembayaran Berhasil'),
-                            content: Text(
-                                'Total yang dibayarkan: Rp${total.toStringAsFixed(2)}\nKembali: Rp${(paidAmount - total).toStringAsFixed(2)}'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    cart.clear();
-                                    discount = 0.0;
-                                    paidAmount = 0.0;
-                                    transactionCode = generateTransactionCode();
-                                  });
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.greenAccent[400],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (cart.isEmpty) {
+                          // Tampilkan pesan error jika keranjang kosong
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Keranjang Kosong'),
+                              content: Text(
+                                  'Silakan tambahkan produk ke keranjang sebelum melakukan pembayaran.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                          return;
+                        }
+
+                        final transaction = {
+                          'transaction_id': transactionCode,
+                          'transaction_date': DateTime.now().toIso8601String(),
+                          'total_price': total,
+                          'produk': cart.entries
+                              .map((entry) => {
+                                    'id_barang': entry.key['id_barang'],
+                                    'quantity': entry.value,
+                                    'harga': entry.key['harga'],
+                                  })
+                              .toList(),
+                        };
+
+                        try {
+                          final result =
+                              await _apiService.createTransaction(transaction);
+                          // Tampilkan dialog sukses jika transaksi berhasil disimpan
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Pembayaran Berhasil'),
+                              content: Text(
+                                  'Total yang dibayarkan: Rp${total.toStringAsFixed(2)}\nKembali: Rp${(paidAmount - total).toStringAsFixed(2)}'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      cart.clear();
+                                      discount = 0.0;
+                                      paidAmount = 0.0;
+                                      transactionCode =
+                                          generateTransactionCode();
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } catch (e) {
+                          // Tampilkan dialog error jika transaksi gagal disimpan
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Pembayaran Gagal'),
+                              content: Text(
+                                  'Terjadi kesalahan saat menyimpan transaksi. Silakan coba lagi.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                       },
                       child: Text('Bayar'),
                     ),
