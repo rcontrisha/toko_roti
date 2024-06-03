@@ -27,6 +27,10 @@ class _HomePageState extends State<HomePage> {
   late Widget _selectedScreen;
   late String _title;
   late String _username;
+  bool _canManageAccount = false;
+  bool _canManageItems = false;
+  bool _canManageTransactions = false;
+  bool _canManageReports = false;
 
   @override
   void initState() {
@@ -34,13 +38,18 @@ class _HomePageState extends State<HomePage> {
     _selectedItem = SideBarItem.dashboard;
     _selectedScreen = DashboardPage();
     _title = 'Dashboard';
-    _loadUsername();
+    _loadUserDetails();
   }
 
-  void _loadUsername() async {
+  void _loadUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _username = prefs.getString('nama_user') ?? '';
+      _canManageAccount = prefs.getBool('can_manage_account') ?? false;
+      _canManageItems = prefs.getBool('can_manage_items') ?? false;
+      _canManageTransactions =
+          prefs.getBool('can_manage_transactions') ?? false;
+      _canManageReports = prefs.getBool('can_manage_reports') ?? false;
     });
   }
 
@@ -65,45 +74,97 @@ class _HomePageState extends State<HomePage> {
     switch (route) {
       case 'dashboard':
         _title = 'Dashboard';
-        break;
+        return DashboardPage();
       case 'daftarakun':
         _title = 'Daftar Akun';
+        if (_canManageAccount) {
+          return DaftarAkun();
+        }
         break;
       case 'hakakses':
         _title = 'Hak Akses';
+        if (_canManageAccount) {
+          return HakAksesPage();
+        }
         break;
       case 'transaksi':
         _title = 'Transaksi';
+        if (_canManageTransactions) {
+          return Transaksi();
+        }
         break;
       case 'laporantransaksi':
         _title = 'Laporan Transaksi';
+        if (_canManageReports) {
+          return LaporanTransaksi();
+        }
         break;
       default:
         _title = 'Dashboard';
-    }
-
-    switch (route) {
-      case 'dashboard':
         return DashboardPage();
-      case 'kelolaakun':
-      case 'daftarakun':
-        return DaftarAkun();
-      case 'hakakses':
-        return HakAksesPage();
-      case 'transaksi':
-        return Transaksi();
-      case 'laporantransaksi':
-        return LaporanTransaksi();
-      default:
-        return Container();
     }
+    return Container(
+      child: Center(
+          child: Text('Anda tidak memiliki hak untuk mengakses halaman ini.')),
+    );
   }
 
   void _logOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('nama_user');
+    await prefs.remove('can_manage_account');
+    await prefs.remove('can_manage_items');
+    await prefs.remove('can_manage_transactions');
+    await prefs.remove('can_manage_reports');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
+  void _onSelected(String route) {
+    setState(() {
+      _selectedItem = _getSideBarItem(route);
+      _selectedScreen = _getSelectedScreen(route);
+    });
+    if (!_checkAccess(route)) {
+      _showAccessDeniedDialog();
+    }
+  }
+
+  bool _checkAccess(String route) {
+    switch (route) {
+      case 'dashboard':
+        return true;
+      case 'daftarakun':
+        return _canManageAccount;
+      case 'hakakses':
+        return _canManageAccount;
+      case 'transaksi':
+        return _canManageTransactions;
+      case 'laporantransaksi':
+        return _canManageReports;
+      default:
+        return false;
+    }
+  }
+
+  void _showAccessDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Akses Ditolak"),
+          content: Text("Anda tidak memiliki hak untuk mengakses halaman ini."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -168,20 +229,22 @@ class _HomePageState extends State<HomePage> {
             ),
             ExpansionTile(
               iconColor: Colors.greenAccent[400],
-              leading: Icon(Icons.business,
-                  color: _selectedItem == SideBarItem.daftarakun ||
-                          _selectedItem == SideBarItem.hakakses
-                      ? Colors.greenAccent[400]
-                      : Colors.black),
+              leading: Icon(
+                Icons.business,
+                color: (_selectedItem == SideBarItem.daftarakun ||
+                        _selectedItem == SideBarItem.hakakses)
+                    ? Colors.greenAccent[400]
+                    : Colors.black,
+              ),
               title: Text(
                 'Kelola Akun',
                 style: TextStyle(
-                  color: _selectedItem == SideBarItem.daftarakun ||
-                          _selectedItem == SideBarItem.hakakses
+                  color: (_selectedItem == SideBarItem.daftarakun ||
+                          _selectedItem == SideBarItem.hakakses)
                       ? Colors.greenAccent[400]
                       : Colors.black,
-                  fontWeight: _selectedItem == SideBarItem.daftarakun ||
-                          _selectedItem == SideBarItem.hakakses
+                  fontWeight: (_selectedItem == SideBarItem.daftarakun ||
+                          _selectedItem == SideBarItem.hakakses)
                       ? FontWeight.bold
                       : FontWeight.normal,
                 ),
@@ -235,13 +298,5 @@ class _HomePageState extends State<HomePage> {
         _onSelected(route);
       },
     );
-  }
-
-  void _onSelected(String route) {
-    final sideBarItem = _getSideBarItem(route);
-    setState(() {
-      _selectedItem = sideBarItem;
-      _selectedScreen = _getSelectedScreen(route);
-    });
   }
 }

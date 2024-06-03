@@ -168,13 +168,19 @@ class _LoginPageState extends State<LoginPage> {
     try {
       // Panggil metode login dari ApiService untuk memverifikasi kredensial
       var user = await ApiService().login(username, password);
+      var access = await ApiService().fetchAccessRightById(user["username"]);
 
       // Debug logging untuk memastikan data akun yang diterima
       print('User: $user');
 
-      // Simpan nama pengguna di shared preferences
+      // Simpan nama pengguna dan hak akses di shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('nama_user', user['nama_user']);
+      prefs.setString('nama_user', user['username']);
+      prefs.setBool('can_manage_account', access['can_manage_account'] == 1);
+      prefs.setBool('can_manage_items', access['can_manage_items'] == 1);
+      prefs.setBool(
+          'can_manage_transactions', access['can_manage_transactions'] == 1);
+      prefs.setBool('can_manage_reports', access['can_manage_reports'] == 1);
 
       // Navigasikan ke halaman beranda
       Navigator.pushReplacement(

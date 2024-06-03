@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = "http://192.168.1.25:8000/api";
+  final String baseUrl = "http://192.168.1.15:8000/api";
 
   Future<dynamic> login(String username, String password) async {
     final response = await http.post(
@@ -315,8 +315,8 @@ class ApiService {
   }
 
   // Fetch a single access right by id
-  Future<dynamic> fetchAccessRightById(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/access-rights/$id'));
+  Future<dynamic> fetchAccessRightById(String username) async {
+    final response = await http.get(Uri.parse('$baseUrl/access-rights/$username'));
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
