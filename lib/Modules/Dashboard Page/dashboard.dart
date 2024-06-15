@@ -121,179 +121,165 @@ class _DashboardPageState extends State<DashboardPage> {
                       ],
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Column 1
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Card untuk Pemasukan Harian
-                              Container(
-                                width: 300,
-                                child: Card(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Pemasukan Harian',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Text(
-                                          'Rp${dailyIncome.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              // Card untuk Jumlah Pelanggan Harian
-                              Container(
-                                width: 300,
-                                child: Card(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Jumlah Pelanggan Harian',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Text(
-                                          '${uniqueTodayTransactions.length}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              // Card untuk Total Pemasukan
-                              Container(
-                                width: 300,
-                                child: Card(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Total Pemasukan',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Text(
-                                          'Rp${totalIncome.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Column 2
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Card untuk Pemasukan Harian
+                        Expanded(
                           child: SizedBox(
-                            height: 400, // Atur tinggi card lebih besar
+                            height: 120,
                             child: Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    // Title Card untuk Riwayat Transaksi
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        'Riwayat Transaksi',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      'Pemasukan Harian',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    // Content Card untuk Riwayat Transaksi (ListView)
-                                    if (todayTransactions.isNotEmpty)
-                                      Expanded(
-                                        child: ListView.builder(
-                                          itemCount: todayTransactions.length,
-                                          itemBuilder: (context, index) {
-                                            dynamic transaction =
-                                                todayTransactions[index];
-                                            return ListTile(
-                                              title: Text(
-                                                  'Transaction ID: ${transaction['transaction_id']}'),
-                                              subtitle: Text(
-                                                  'Transaction Date: ${transaction['transaction_date']}'),
-                                              trailing: Text(
-                                                  'Total Price: Rp${transaction['total_price']}'),
-                                            );
-                                          },
-                                        ),
-                                      )
-                                    else
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 20.0),
-                                        child: Align(
-                                          alignment: Alignment.topCenter,
-                                          child: Text(
-                                            'Belum ada transaksi hari ini',
-                                            style: TextStyle(
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                        ),
+                                    Spacer(),
+                                    Text(
+                                      'Rp${dailyIncome.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        fontSize: 14,
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
                         ),
+                        SizedBox(width: 10),
+                        // Card untuk Jumlah Pelanggan Harian
+                        Expanded(
+                          child: SizedBox(
+                            height: 120,
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Jumlah Pelanggan Harian',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      '${uniqueTodayTransactions.length}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        // Card untuk Total Pemasukan
+                        Expanded(
+                          child: SizedBox(
+                            height: 120,
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Total Pemasukan',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      'Rp${totalIncome.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Card untuk Riwayat Transaksi
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      height: 400, // Atur tinggi card lebih besar
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title Card untuk Riwayat Transaksi
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Riwayat Transaksi',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              // Content Card untuk Riwayat Transaksi (ListView)
+                              if (todayTransactions.isNotEmpty)
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: todayTransactions.length,
+                                    itemBuilder: (context, index) {
+                                      dynamic transaction =
+                                          todayTransactions[index];
+                                      return ListTile(
+                                        title: Text(
+                                            'Transaction ID: ${transaction['transaction_id']}'),
+                                        subtitle: Text(
+                                            'Transaction Date: ${transaction['transaction_date']}'),
+                                        trailing: Text(
+                                            'Total Price: Rp${transaction['total_price']}'),
+                                      );
+                                    },
+                                  ),
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 20.0),
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: Text(
+                                      'Belum ada transaksi hari ini',
+                                      style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

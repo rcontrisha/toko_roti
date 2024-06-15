@@ -6,6 +6,7 @@ import 'package:toko_roti/Modules/Kelola%20Akun%20Page/hak_akses.dart';
 import 'package:toko_roti/Modules/Laporan%20Transaksi%20Page/laporan_transaksi.dart';
 import 'package:toko_roti/Modules/Login%20Page/login_screen.dart';
 import 'package:toko_roti/Modules/Transaksi%20Page/transaksi.dart';
+import 'package:toko_roti/Modules/Transaksi%20Page/transaksi_user.dart';
 
 enum SideBarItem {
   dashboard,
@@ -92,7 +93,7 @@ class _HomePageState extends State<HomePage> {
         if (_canManageTransactions) {
           return Transaksi();
         }
-        break;
+        return TransaksiUser();
       case 'laporantransaksi':
         _title = 'Laporan Transaksi';
         if (_canManageReports) {
@@ -140,7 +141,7 @@ class _HomePageState extends State<HomePage> {
       case 'hakakses':
         return _canManageAccount;
       case 'transaksi':
-        return _canManageTransactions;
+        return true; // Transaksi is accessible by all users
       case 'laporantransaksi':
         return _canManageReports;
       default:

@@ -5,8 +5,6 @@ import 'package:toko_roti/Modules/Home%20Page/home_view.dart';
 import 'package:toko_roti/Modules/Login%20Page/login_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
   runApp(
     ProviderScope(
       child: MaterialApp(

@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = "http://192.168.1.15:8000/api";
+  final String baseUrl = "https://roti-api.000webhostapp.com/api";
 
   Future<dynamic> login(String username, String password) async {
     final response = await http.post(
@@ -303,20 +304,30 @@ class ApiService {
     }
   }
 
-  // Fetch list of access rights
+  // Fetch user access rights
   Future<List<dynamic>> fetchAccessRights() async {
-    final response = await http.get(Uri.parse('$baseUrl/access-rights'));
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/access-rights'))
+          .timeout(Duration(seconds: 15), onTimeout: () {
+        throw TimeoutException('The connection has timed out!');
+      });
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load access rights');
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load access rights');
+      }
+    } catch (e) {
+      print('Error fetching access rights: $e');
+      rethrow;
     }
   }
 
   // Fetch a single access right by id
   Future<dynamic> fetchAccessRightById(String username) async {
-    final response = await http.get(Uri.parse('$baseUrl/access-rights/$username'));
+    final response =
+        await http.get(Uri.parse('$baseUrl/access-rights/$username'));
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -342,21 +353,32 @@ class ApiService {
     }
   }
 
-  // Update an existing access right
+  // Update access right
   Future<dynamic> updateAccessRight(
       String username, Map<String, dynamic> accessRight) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/access-rights/$username'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(accessRight),
-    );
+    try {
+      final response = await http
+          .put(
+        Uri.parse('$baseUrl/access-rights/$username'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(accessRight),
+      )
+          .timeout(Duration(seconds: 60), onTimeout: () {
+        throw TimeoutException('The connection has timed out!');
+      });
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to update access right');
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print(
+            'Failed to update access right. Status code: ${response.statusCode}, Body: ${response.body}');
+        throw Exception('Failed to update access right');
+      }
+    } catch (e) {
+      print('Error updating access right: $e');
+      rethrow;
     }
   }
 
@@ -411,7 +433,8 @@ class ApiService {
   }
 
   // Update an existing transaction
-  Future<dynamic> updateTransaction(int id, Map<String, dynamic> transaction) async {
+  Future<dynamic> updateTransaction(
+      int id, Map<String, dynamic> transaction) async {
     final response = await http.put(
       Uri.parse('$baseUrl/transactions/$id'),
       headers: <String, String>{

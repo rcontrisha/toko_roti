@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toko_roti/Services/api_services.dart';
 
 class HakAksesPage extends StatefulWidget {
@@ -39,14 +38,21 @@ class _HakAksesPageState extends State<HakAksesPage> {
     };
 
     try {
-      print(username);
-      print(value);
+      print('Updating access right for $username: $updatedAccessRight');
       await _apiService.updateAccessRight(username, updatedAccessRight);
-      print('Access right updated successfully');
-      // Memperbarui daftar akses pengguna setelah berhasil memperbarui akses
+      print('Access right updated successfully for $username');
+      // Reload the user access list
       await _fetchUserAccess();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Access right updated successfully for $username')),
+      );
     } catch (e) {
-      print('Failed to update access right: $e');
+      print('Failed to update access right for $username: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed to update access right for $username: $e')),
+      );
     }
   }
 
@@ -54,9 +60,8 @@ class _HakAksesPageState extends State<HakAksesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        scrollDirection: Axis.vertical, // Mengatur arah scroll menjadi vertikal
+        scrollDirection: Axis.horizontal, // Scroll direction set to horizontal
         child: Center(
-          // Menggunakan Center untuk membuat tabel menjadi terpusat
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLoginForm() {
     return Center(
       child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 150.0, vertical: 50.0),
+        margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         elevation: 8.0,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
               _buildUsernameField(),
               SizedBox(height: 10),
               _buildPasswordField(),
-              SizedBox(height: 10),
+              SizedBox(height: 30),
               Container(
                 height: 40,
                 width: double.infinity,
